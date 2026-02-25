@@ -93,6 +93,7 @@ Instead of services polling each other, we use a **reactive push model** via Kaf
 ### Why this scales:
 
 If we later add a **Search Service** or an **Image Processing Service**, we simply point them to the same Kafka topic. The **Catalog Service** code never has to change to accommodate new features.
+
 ---
 
 ## Tech Stack
