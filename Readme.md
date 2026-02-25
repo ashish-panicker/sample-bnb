@@ -90,6 +90,17 @@ Instead of services polling each other, we use a **reactive push model** via Kaf
 
 ---
 
+### The Full "Airbnb" Data Journey
+
+Now that all components are connected, here is how the data flows through your system when a host adds a "Beachfront Villa":
+
+- **Catalog Service:** Host saves the Villa. The CommandLineRunner (or API) saves it to H2 and sends a message to Kafka.
+- **Kafka Topic (listing-events):** Holds the message {id: 101, type: "Villa", price: 1500}.
+- **Pricing Service:** Sees the message → recognizes it's a Villa → sets a 1.5x multiplier and $250 cleaning fee in its local H2.
+- **Availability Service:** Sees the same message → creates a Redis Bitset entry for ID 101 → marks all future dates as 0 (Available).
+
+--- 
+
 ### Why this scales:
 
 If we later add a **Search Service** or an **Image Processing Service**, we simply point them to the same Kafka topic. The **Catalog Service** code never has to change to accommodate new features.

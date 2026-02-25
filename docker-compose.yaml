@@ -1,7 +1,4 @@
 services:
-  # =========================
-  # Kafka (KRaft Mode - No Zookeeper)
-  # =========================
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -32,9 +29,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # =========================
-  # Schema Registry (Avro)
-  # =========================
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
     container_name: schema-registry
@@ -48,9 +42,6 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka:29092"
       SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
 
-  # =========================
-  # Kafka UI
-  # =========================
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
@@ -65,6 +56,30 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
       DYNAMIC_CONFIG_ENABLED: "true"
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: airbnb-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Redis Insight (Optional): A GUI to visualize your calendar locks
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: airbnb-redis-gui
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+volumes:
+  redis_data:
 networks:
   default:
     name: bnb-network
