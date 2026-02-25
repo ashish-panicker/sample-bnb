@@ -120,3 +120,43 @@ If we later add a **Search Service** or an **Image Processing Service**, we simp
 ### Key Advantage
 
 By using this workflow, the **Pricing Service** can function even if the **Catalog Service** is offline. It has its own copy of the necessary data, which significantly reduces system latency and improves the user experience during the booking process.
+
+
+### Sample Api Calls
+
+```
+###
+GET http://localhost:9082/api/v1/pricing/quote/4?
+    isWeekend=false
+
+###
+GET http://localhost:9083/api/v1/availability/check/2?
+    dates=2026-06-01,2026-06-02,2026-06-03,2026-06-05
+
+###
+POST http://localhost:9083/api/v1/availability/lock/2
+Content-Type: application/json
+
+["2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05"]
+
+###
+POST http://localhost:9083/api/v1/availability/confirm/2?
+    reservationId=1
+Content-Type: application/json
+
+["2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05"]
+
+###
+POST http://localhost:9081/api/v1/listings
+Content-Type: application/json
+
+{
+  "title": "Beachfront Villa",
+  "description": "A cozy beachfront villa",
+  "address": "221 Ocean Drive, Malibu",
+  "propertyType": "Villa",
+  "maxGuests": 4,
+  "basePrice": 500.0,
+  "hostId": 105
+}
+```
