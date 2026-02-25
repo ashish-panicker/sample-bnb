@@ -1,0 +1,15 @@
+INSERT INTO listing (title, description, address, property_type, max_guests, base_price, host_id)
+VALUES ('Cozy Beachfront Cottage', 'A beautiful 1-bedroom cottage right on the sand.', '123 Ocean Drive, Malibu',
+        'Cottage', 2, 150.0, 101);
+
+INSERT INTO listing (title, description, address, property_type, max_guests, base_price, host_id)
+VALUES ('Modern Loft in Soho', 'Industrial style loft with high ceilings and city views.', '45 Spring St, New York',
+        'Apartment', 4, 350.0, 102);
+
+INSERT INTO listing (title, description, address, property_type, max_guests, base_price, host_id)
+VALUES ('Rustic Mountain Cabin', 'Escape to the woods in this hand-built cedar cabin.', '789 Pine Way, Aspen', 'Cabin',
+        6, 200.0, 103);
+
+INSERT INTO listing (title, description, address, property_type, max_guests, base_price, host_id)
+VALUES ('Luxury Villa with Pool', 'Infinity pool overlooking the Mediterranean sea.', 'Villa 5, Santorini', 'Villa', 8,
+        1200.0, 104);
