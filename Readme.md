@@ -63,20 +63,20 @@ Instead of services polling each other, we use a **reactive push model** via Kaf
 1. **Creation:** A host creates a listing via the **Catalog Service** (e.g., a "Villa" in Santorini).
 2. **Persistence:** The Catalog Service saves the record to its local H2 database.
 3. **Emission:** The Catalog Service publishes a `ListingEvent` to the Kafka topic `listing-events`.
-* *Payload:* `{ "listingId": 104, "basePrice": 1200.0, "propertyType": "Villa", "status": "CREATED" }`.
+  * *Payload:* `{ "listingId": 104, "basePrice": 1200.0, "propertyType": "Villa", "status": "CREATED" }`.
 
 
 4. **Parallel Ingestion:** Both the **Pricing** and **Availability** services are subscribed to the `listing-events` topic and receive the message simultaneously.
 5. **Smart Processing (Pricing Service):**
-* **Consumption:** The service picks up the "Villa" type.
-* **Logic:** Using a **Java Switch Expression**, it maps the "Villa" type to luxury-tier multipliers (e.g., 1.5x weekend hike).
-* **Initialization:** It saves these rules to its local database. Future price quotes for ID 104 are now handled entirely within the Pricing Service.
+  * **Consumption:** The service picks up the "Villa" type.
+  * **Logic:** Using a **Java Switch Expression**, it maps the "Villa" type to luxury-tier multipliers (e.g., 1.5x weekend hike).
+  * **Initialization:** It saves these rules to its local database. Future price quotes for ID 104 are now handled entirely within the Pricing Service.
 
 
 6. **Calendar Setup (Availability Service):**
-* **Consumption:** The service identifies that a new inventory item (ID 104) is live.
-* **Logic:** It initializes the availability state. This involves creating a persistent record in its DB and "pre-warming" a **Redis Bitset** where the next 365 bits are set to `0` (Available).
-* **Initialization:** The calendar is now "open" for business. Any subsequent "soft locks" or booking requests for ID 104 will be validated against this local Redis/DB state.
+  * **Consumption:** The service identifies that a new inventory item (ID 104) is live.
+  * **Logic:** It initializes the availability state. This involves creating a persistent record in its DB and "pre-warming" a **Redis Bitset** where the next 365 bits are set to `0` (Available).
+  * **Initialization:** The calendar is now "open" for business. Any subsequent "soft locks" or booking requests for ID 104 will be validated against this local Redis/DB state.
 
 ---
 
