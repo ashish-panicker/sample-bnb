@@ -119,9 +119,36 @@ services:
       - "5540:5540"
     depends_on:
       - redis
+  keycloak-db:
+    image: mariadb:11.4
+    container_name: keycloak-db
+    environment:
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - keycloak_data:/var/lib/mysql
+    networks:
+      - bnb-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.4
+    container_name: keycloak
+    command: start-dev --db mariadb --db-url jdbc:mariadb://keycloak-db/keycloak --db-username keycloak --db-password password
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080" # Mapping to 8180 to avoid conflicts with your Gateway (8080)
+    depends_on:
+      - keycloak-db
+    networks:
+      - bnb-network
 volumes:
   redis_data:
   prometheus_data:
+  keycloak_data:
 networks:
-  default:
-    name: bnb-network
+  bnb-network:
+    driver: bridge

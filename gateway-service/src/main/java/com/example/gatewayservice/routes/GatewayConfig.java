@@ -23,6 +23,7 @@ import java.util.function.Function;
 import static org.springframework.cloud.gateway.server.mvc.filter.CircuitBreakerFilterFunctions.circuitBreaker;
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.rewritePath;
 import static org.springframework.cloud.gateway.server.mvc.filter.Bucket4jFilterFunctions.rateLimit;
+import static org.springframework.cloud.gateway.server.mvc.filter.TokenRelayFilterFunctions.tokenRelay;
 import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
@@ -86,6 +87,7 @@ public class GatewayConfig {
         services.forEach((name, url) -> {
             builder.add(route(name + "_service")
                     .route(path("/api/v1/" + name + "/**"), http(url))
+                    .filter(tokenRelay())
 //                    .filter(rateLimiter)
                     .filter(circuitBreaker(name + "_cb", URI.create("forward:/fallback")))
                     .build()

@@ -14,4 +14,9 @@ public class Fallback {
         return ResponseEntity.internalServerError()
                 .body(Map.of("status", "Circuit breaker open"));
     }
+
+    @GetMapping
+    public String index() {
+        return "Gateway";
+    }
 }
