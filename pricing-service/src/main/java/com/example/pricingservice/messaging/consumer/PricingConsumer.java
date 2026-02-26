@@ -4,7 +4,10 @@ import com.example.pricingservice.domain.model.PriceRule;
 import com.example.pricingservice.domain.service.PricingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,10 +19,36 @@ public class PricingConsumer {
 
     private final PricingService service;
 
+    @KafkaListener(topics = "listing-events.DLT", groupId = "pricing-dlt-group")
+    public void processFailedListing(
+            Object failedMessage,
+            @Header(KafkaHeaders.ORIGINAL_TOPIC) String originalTopic,
+            @Header(KafkaHeaders.DLT_EXCEPTION_MESSAGE) String exceptionMessage,
+            @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE) String stackTrace) {
+
+        log.error("--- DEAD LETTER DETECTED ---");
+        log.error("Original Topic: {}", originalTopic);
+        log.error("Reason for Failure: {}", exceptionMessage);
+        log.error("Payload: {}", failedMessage);
+
+        // Logic for recovery:
+        // 1. Save to a 'failed_listings' table for an admin dashboard
+        // 2. Send an alert to Slack/Teams
+        // 3. Increment a Prometheus metric for monitoring
+
+        log.debug("Stacktrace for debugging: {}", stackTrace);
+    }
+
     @KafkaListener(topics = "listing-events", groupId = "pricing-group")
     public void handleListingEvent(Map<String, Object> message) {
         Long listingId = Long.valueOf(message.get("listingId").toString());
+        if (message.get("basePrice") == null) {
+            throw new RuntimeException("Invalid Message: Null base price");
+        }
         double basePrice = Double.parseDouble(message.get("basePrice").toString());
+        if (basePrice == 0.0) {
+            throw new RuntimeException("Invalid Message: Empty base price");
+        }
         String status = (String) message.get("status");
         String propertyType = (String) message.get("propertyType");
 
