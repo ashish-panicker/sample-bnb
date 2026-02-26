@@ -1,4 +1,45 @@
 services:
+  init_prometheus:
+    image: prom/prometheus
+    container_name: init_prometheus
+    user: root
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        chown -R 65534:65534 prometheus
+    volumes:
+      - /prometheus:/prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    depends_on:
+      - init_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /prometheus/:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: always
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: always
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    restart: always
+    environment:
+      - JAVA_OPTS=-Xmx128m
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -80,6 +121,7 @@ services:
       - redis
 volumes:
   redis_data:
+  prometheus_data:
 networks:
   default:
     name: bnb-network
